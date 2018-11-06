@@ -19,7 +19,10 @@ public class AppMain {
     HttpServer httpServer = vertx.createHttpServer();
 
     Router router = Router.router(vertx);
-    router.route().handler(BodyHandler.create().setUploadsDirectory("uploadTemp/"));
+
+    // Here I set uploads dir as null, but it doesn't work as I expect.
+    router.route().handler(BodyHandler.create().setUploadsDirectory(null));
+
     router.routeWithRegex("/upload").handler(routingContext -> {
       Set<FileUpload> fileUploads = routingContext.fileUploads();
       LOGGER.info("get [" + fileUploads.size() + "] uploaded files");
