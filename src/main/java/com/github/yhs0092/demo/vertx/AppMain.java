@@ -21,7 +21,23 @@ public class AppMain {
     Router router = Router.router(vertx);
 
     // Here I set uploads dir as null, but it doesn't work as I expect.
-    router.route().handler(BodyHandler.create().setUploadsDirectory(null));
+    router.route()
+        .handler(ctx -> {
+          System.out.println("pre handle");
+          ctx.request().uploadHandler(upload -> {
+//        ctx.request().connection().close();
+//        ctx.response()
+//            .putHeader("Content-Type", "text/plain")
+//            .end("uploading file not supported");
+            System.out.println("heihei!");
+          });
+          ctx.next();
+        })
+        .handler(BodyHandler.create())
+        .handler(ctx -> {
+          System.out.println("go on");
+          ctx.next();
+        });
 
     router.routeWithRegex("/upload").handler(routingContext -> {
       Set<FileUpload> fileUploads = routingContext.fileUploads();
