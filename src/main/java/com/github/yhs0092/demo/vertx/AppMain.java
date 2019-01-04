@@ -1,12 +1,9 @@
 package com.github.yhs0092.demo.vertx;
 
-import java.util.Set;
-
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import io.vertx.ext.web.FileUpload;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.BodyHandler;
 
@@ -30,24 +27,18 @@ public class AppMain {
             context.response().setStatusCode(413).end("failure response");
           }
           if (!context.response().closed()) {
+            // if I close this response, the uploaded file will not be removed
             LOGGER.info("close response");
             context.response().close();
           }
         });
 
-    router.routeWithRegex("/upload").handler(routingContext -> {
-      Set<FileUpload> fileUploads = routingContext.fileUploads();
-      LOGGER.info("get [" + fileUploads.size() + "] uploaded files");
-      for (FileUpload fileUpload : fileUploads) {
-        LOGGER.info("get uploaded file: [" + fileUpload.uploadedFileName() + "], size = [" + fileUpload.size() + "]");
-      }
+    router.routeWithRegex("/upload").handler(routingContext ->
+        routingContext.response()
+            .putHeader("Content-Type", "text/plain")
+            .end("get " + routingContext.fileUploads().size() + " files."));
 
-      routingContext.response()
-          .putHeader("Content-Type", "text/plain")
-          .end("get " + fileUploads.size() + " files.");
-    });
-
-    httpServer.requestHandler(router::accept).listen(8080,
+    httpServer.requestHandler(router).listen(8080,
         res -> {
           if (res.succeeded()) {
             LOGGER.info("Server is up!");
